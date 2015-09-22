@@ -1,0 +1,58 @@
+= consistentring
+:toc: macro
+
+toc::[]
+
+= Overview
+
+Represents a consistent hashing ring that can be used to route traffic based on percentages in nginx.
+Idea being that you can use a session id to route X number of users to the new site, and X number of users to the existing site.
+If the session id is a randomly generated uuid, then roughly 75% would go to the bbc, 25% to google for the example below 
+
+[source,nginx]
+----
+lua_package_path "/tmp/?.lua;;";
+init_by_lua '
+	require "org/greencheek/continuum"
+        routing = continuum:new(
+		{
+        		_www = 75,
+        		_www2 = 25
+    		}
+        )
+
+';
+
+server {
+    listen       80;
+    server_name  localhost;
+
+    location ~/consistentroute/(.*) {
+            set $route $1;
+            content_by_lua '
+                local route = routing:get(ngx.var.route)
+   		local res = ngx.location.capture(route)
+                ngx.say(res.body)
+            ';
+    }
+
+    location _www {
+		internal;
+        proxy_pass http://www.bbc.co.uk/;
+    }
+
+    location _www2 {
+		internal;
+		proxy_pass http://www.google.co.uk/;
+    }
+}
+----
+
+[source,curl]
+----
+# This consistently returns google
+curl localhost/consistentroute/google.co.uk
+
+# This consistently returns bbc
+curl localhost/consistentroute/bbc.co.uk
+----
