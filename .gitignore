@@ -1,6 +1,4 @@
 .vagrant
-ansible.sublime*
-grafana*
 .#*
 .DS_Store
 .idea
@@ -10,17 +8,6 @@ bin/
 include/
 lib/
 README.html
-.projectile
 *.iml
-ami.version
-package.version
-bastionami.version
-natami.version
-aws/local-testing.yml
-aws/local-testing-*.yml
 .cache/
-aws/roles/app-role
-sdfe-ansible*.rpm
-sdfe-release*.rpm
-appinfo.properties
 out/
